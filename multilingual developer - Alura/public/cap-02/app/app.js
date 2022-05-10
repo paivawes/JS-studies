@@ -1,6 +1,6 @@
-import { Person } from "./models/person.js";
-import { Animal } from "./models/animal.js";
-import { SessionFactory } from "./infra/session-factory.js";
+import { Person } from './models/person.js';
+import { Animal } from './models/animal.js';
+import { SessionFactory } from './infra/session-factory.js';
 
 (async () => {
     const session = await new SessionFactory({
@@ -8,7 +8,7 @@ import { SessionFactory } from "./infra/session-factory.js";
         dbVersion: 1,
         mappers: [
             {
-                clazz: Person,
+                clazz: Person, 
                 converter: data => new Person(data.name, data.surname)
             },
             {
@@ -18,8 +18,8 @@ import { SessionFactory } from "./infra/session-factory.js";
         ]
     })
     .openSession()
-    
-    const person = new Person('Weslley' , 'Paiva')
+
+    const person = new Person('Weslley', 'Paiva')
     const animal = new Animal('Cachorro')
 
     await session.save(person)
@@ -31,4 +31,5 @@ import { SessionFactory } from "./infra/session-factory.js";
     console.log(animals)
 
 })().catch(e => console.log(e))
+
 

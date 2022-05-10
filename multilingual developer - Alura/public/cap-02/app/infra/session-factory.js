@@ -1,22 +1,21 @@
 export class SessionFactory {
-    constructor(config){
+    constructor(config) {
         this.dbName = config.dbName
         this.dbVersion = config.dbVersion
         this.stores = new Map()
         config.mappers.forEach(mapper => {
             this.stores.set(
-                mapper.clazz.name,
+                mapper.clazz.name, 
                 mapper.converter
             )
-        })
-        
+        });
     }
 
-    async openSession(){
+    async openSession() {
         const connection = await createConnection(
-            this.dbName,
-             this.dbVersion,
-             this.store
+            this.dbName, 
+            this.dbVersion, 
+            this.stores
         )
 
         return new Session(connection, this.stores)
@@ -25,7 +24,7 @@ export class SessionFactory {
 
 class Session {
     constructor(connection, stores) {
-        this.connection = connection,
+        this.connection = connection
         this.stores = stores
     }
 
@@ -42,10 +41,10 @@ class Session {
                 reject(`Não foi possível persistir o objeto na store ${storeName}`)
             }
         })
-    }
-
+    } 
+   
     list(clazz) {
-        return new Promisse((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             const storeName = clazz.name
             const store = this.connection
                 .transaction([storeName], 'readwrite')
@@ -55,7 +54,7 @@ class Session {
             const list = []
             cursor.onsuccess = e => {
                 const current = e.target.result
-                if(current) {
+                if (current) {
                     const value = current.value
                     list.push(converter(value))
                     current.continue()
@@ -64,27 +63,25 @@ class Session {
                 }
             }
         })
-    }
+    }   
 }
 
 function createConnection(dbName, dbVersion, stores) {
-    return new Promise((resolve, reject) => {
 
+    return new Promise((resolve, reject) => {
         const request = window.indexedDB.open(dbName, dbVersion)
 
         request.onupgradeneeded = e => {
             const transactionalConnection = e.target.result
-            for(let [key, value] of stores) {
+            for (let [key, value] of stores) {
                 const store = key
-
-                if(transactionalConnection.objectStoreName.contains(stores)) {
+            
+                if (transactionalConnection.objectStoreNames.contains(store)) {
                     transactionalConnection.deleteObjectStore(store)
-                }
-
-                transactionalConnection.createdObject(store, {autoIncrement: true})
-                
-            }
-        }
+                }   
+                transactionalConnection.createObjectStore(store, { autoIncrement: true })
+            }     
+        };
 
         request.onsuccess = e => {
             const connection = e.target.result
@@ -92,8 +89,8 @@ function createConnection(dbName, dbVersion, stores) {
         }
 
         request.onerror = e => {
-            console.log(e.target.error)
-            reject(`Não foi possível obter a conexão como o banco ${dbVersion}`)
+            console.log(e.target.error);
+            reject(`Não foi possível obter a conexão com o banco ${dbVersion}`)
         }
     })
 }

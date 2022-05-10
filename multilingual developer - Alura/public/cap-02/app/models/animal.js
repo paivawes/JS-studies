@@ -1,6 +1,6 @@
 export class Animal {
-
-    constructor(name, surname){
+    
+    constructor(name, surname) {
         this.name = name
     }
 }
